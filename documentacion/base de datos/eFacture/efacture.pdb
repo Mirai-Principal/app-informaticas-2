@@ -4213,7 +4213,7 @@ Shadow=0</a:DisplayPreferences>
 <o:ReferenceSymbol Id="o5">
 <a:CreationDate>1732560138</a:CreationDate>
 <a:ModificationDate>1732598044</a:ModificationDate>
-<a:Rect>((-12898,12301), (3202,13947))</a:Rect>
+<a:Rect>((-12898,12301), (3202,13902))</a:Rect>
 <a:ListOfPoints>((-2302,12926),(-7395,12926))</a:ListOfPoints>
 <a:CornerStyle>2</a:CornerStyle>
 <a:ArrowStyle>1</a:ArrowStyle>
@@ -4235,7 +4235,7 @@ DESTINATION 0 Arial,8,N</a:FontList>
 <o:ReferenceSymbol Id="o9">
 <a:CreationDate>1732560139</a:CreationDate>
 <a:ModificationDate>1732599041</a:ModificationDate>
-<a:Rect>((9214,10201), (25464,11847))</a:Rect>
+<a:Rect>((9214,10201), (25464,11796))</a:Rect>
 <a:ListOfPoints>((14898,10826),(19780,10826))</a:ListOfPoints>
 <a:CornerStyle>2</a:CornerStyle>
 <a:ArrowStyle>1</a:ArrowStyle>

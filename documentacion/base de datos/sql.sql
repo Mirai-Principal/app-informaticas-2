@@ -1,13 +1,9 @@
 drop sequence efacture_repo.sq_categorias;
-
 drop sequence efacture_repo.sq_comprobantes;
-
 drop sequence efacture_repo.sq_deducciones;
-
 drop sequence efacture_repo.sq_membresias;
-
 drop sequence efacture_repo.sq_usuarios;
-
+drop sequence efacture_repo.sq_sueldo_basico;
 create sequence efacture_repo.sq_categorias
 increment 1
 minvalue 0
@@ -29,6 +25,11 @@ minvalue 0
 start 0;
 
 create sequence efacture_repo.sq_usuarios
+increment 1
+minvalue 0
+start 0;
+
+create sequence efacture_repo.sq_sueldo_basico
 increment 1
 minvalue 0
 start 0;
@@ -108,14 +109,27 @@ create table efacture_repo.comprobantes (
 );
 
 /*==============================================================*/
+/* Table: sueldo_basico                                   */
+/*==============================================================*/
+create table efacture_repo.sueldo_basico (
+  cod_sueldo           varchar(5)           DEFAULT 'sbu_' || nextval('efacture_repo.sq_sueldo_basico'),
+   valor_sueldo         decimal              not null default 460
+      constraint ckc_valor_sueldo_sueldo_b check (valor_sueldo >= 1),
+   created_at           timestamp            not null default current_timestamp,
+   updated_at           timestamp            null,
+   deleted_at           timestamp            null,
+   constraint pk_sueldo_basico primary key (cod_sueldo)
+);
+
+/*==============================================================*/
 /* Table: categoria_comprobante                                   */
 /*==============================================================*/
 create table efacture_repo.categoria_comprobante (
    cod_comprobante      varchar(10)          not null,
    cod_categoria        varchar(5)           not null,
-   sueldo_basico        decimal(4)                not null,
-   valor_categoria      decimal(4)                not null,
-   valor_deducido_cat   decimal(4)                not null,
+   cod_sueldo           varchar(5)          null,
+   valor_categoria      decimal              not null,
+   valor_deducido_cat   decimal              not null,
    created_at           timestamp            not null default current_timestamp,
    updated_at           timestamp            null,
    deleted_at           timestamp            null,
@@ -125,6 +139,9 @@ create table efacture_repo.categoria_comprobante (
       on delete cascade on update cascade,
    constraint fk_categori_reference_categori foreign key (cod_categoria)
       references efacture_repo.categorias (cod_categoria)
+      on delete cascade on update cascade,
+   constraint fk_categori_reference_sueldo_b foreign key (cod_sueldo)
+      references efacture_repo.sueldo_basico (cod_sueldo)
       on delete cascade on update cascade
 );
 
@@ -174,17 +191,11 @@ create table efacture_repo.usuario_membresia (
 comment on column efacture_repo.usuario_membresia.created_at is
 'fecha de compra';
 
-create table efacture_repo.sueldo_basico (
-   valor                decimal(4)                not null default 460
-      constraint ckc_valor_sueldo_b check (valor >= 1),
-   created_at           timestamp            not null default current_timestamp,
-   updated_at           timestamp            null,
-   deleted_at           timestamp            null
-);
+
 
 --valores por defecto
 INSERT INTO efacture_repo.usuarios(
 	identificacion, nombres, apellidos, correo, password, tipo_usuario)
 	VALUES ('0202519914', 'darwin', 'bayas', 'tidomar@gmail.com', '1234', 'admin');
 
-insert into efacture_repo.sueldo_basico(valor) values(460);
+insert into efacture_repo.sueldo_basico(valor_sueldo) values(460);
