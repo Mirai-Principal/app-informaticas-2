@@ -194,8 +194,9 @@ comment on column efacture_repo.usuario_membresia.created_at is
 
 
 --valores por defecto
+-- clave: Peru321_
 INSERT INTO efacture_repo.usuarios(
 	identificacion, nombres, apellidos, correo, password, tipo_usuario)
-	VALUES ('0202519914', 'darwin', 'bayas', 'tidomar@gmail.com', '1234', 'admin');
+	VALUES ('0602908170', 'darwin', 'bayas', 'tidomarh@hotmail.com', '$pbkdf2-sha256$29000$jXHOuTcG4HxPSan1XiuFEA$JVaoEKE.SpN1PEFJKpyO.YvZGabhPp8P0AXX2mjZ/Zc', 'admin');
 
 insert into efacture_repo.sueldo_basico(valor_sueldo) values(460);
