@@ -38,7 +38,7 @@ start 0;
 /* Table: categorias_comprobante                                */
 /*==============================================================*/
 create table efacture_repo.categorias (
-   cod_categoria        varchar(5)           DEFAULT 'cat_' || nextval('efacture_repo.sq_categorias'),
+   cod_categoria        varchar(10)           DEFAULT 'cat_' || nextval('efacture_repo.sq_categorias'),
    categoria            varchar(50)          not null UNIQUE,
    descripcion_categoria text                 null,
    cant_sueldos_basico  int2                 not null
@@ -112,9 +112,10 @@ create table efacture_repo.comprobantes (
 /* Table: sueldo_basico                                   */
 /*==============================================================*/
 create table efacture_repo.sueldo_basico (
-  cod_sueldo           varchar(5)           DEFAULT 'sbu_' || nextval('efacture_repo.sq_sueldo_basico'),
-   valor_sueldo         decimal              not null default 460
+   cod_sueldo           varchar(10)           DEFAULT 'sbu_' || nextval('efacture_repo.sq_sueldo_basico'),
+   valor_sueldo         numeric(7,2)         not null default 460
       constraint ckc_valor_sueldo_sueldo_b check (valor_sueldo >= 1),
+   periodo_fiscal       date                 not null,
    created_at           timestamp            not null default current_timestamp,
    updated_at           timestamp            null,
    deleted_at           timestamp            null,
@@ -126,8 +127,8 @@ create table efacture_repo.sueldo_basico (
 /*==============================================================*/
 create table efacture_repo.categoria_comprobante (
    cod_comprobante      varchar(10)          not null,
-   cod_categoria        varchar(5)           not null,
-   cod_sueldo           varchar(5)          null,
+   cod_categoria        varchar(10)           not null,
+   cod_sueldo           varchar(10)          null,
    valor_categoria      decimal              not null,
    valor_deducido_cat   decimal              not null,
    created_at           timestamp            not null default current_timestamp,
@@ -149,37 +150,39 @@ create table efacture_repo.categoria_comprobante (
 /* Table: membresias                                            */
 /*==============================================================*/
 create table efacture_repo.membresias (
-   cod_membresia        varchar(5)           DEFAULT 'mem_' || nextval('efacture_repo.sq_membresias'),
+   cod_membresia        varchar(10)          DEFAULT 'mem_' || nextval('efacture_repo.sq_membresias'),
    nombre_membresia     varchar(50)          not null UNIQUE,
-   descripcion_membresia text                not null,
-   precio               decimal(4)           not null,
-   cant_comprobantes_carga int4              not null,
-   duracion             varchar(10)          not null default 'mensual'
-      constraint ckc_duracion_membresi check (duracion in ('mensual','anual')),
+   descripcion_membresia text                 not null,
+   caracteristicas       text                 not null,
+   precio               numeric(5,2)         not null  constraint ckc_precio_membresi check (precio >= 0),
+   cant_comprobantes_carga int4                 not null,
    estado               varchar(20)          not null default 'no disponible'
       constraint ckc_estado_membresi check (estado in ('no disponible','disponible')),
-   fecha_lanzamiento    timestamp            not null,
+   fecha_lanzamiento    date                 not null,
    vigencia_meses       int2                 not null default 12
       constraint ckc_vigencia_meses_membresi check (vigencia_meses >= 1),
-   fecha_finalizacion   timestamp            not null,
+   fecha_finalizacion   date                 not null,
+   destacado            varchar(2)           not null default 'no'
+      constraint ckc_destacado_membresi check (destacado in ('si','no')),
    created_at           timestamp            not null default current_timestamp,
    updated_at           timestamp            null,
    deleted_at           timestamp            null,
    constraint pk_membresias primary key (cod_membresia)
 );
-
 /*==============================================================*/
 /* Table: usuario_membresia                                     */
 /*==============================================================*/
 create table efacture_repo.usuario_membresia (
    cod_usuario          varchar(10)          not null,
-   cod_membresia        varchar(5)           not null,
+   cod_membresia        varchar(10)          not null,
+   order_id_paypal      varchar(50)          not null,
    estado_membresia     varchar(20)          not null default 'vigente'
       constraint ckc_estado_membresia_usuario_ check (estado_membresia in ('vigente','no vigente')),
+   fecha_vencimiento    timestamp            default (NOW() + INTERVAL '1 year'),
    created_at           timestamp            not null default current_timestamp,
    updated_at           timestamp            null,
    deleted_at           timestamp            null,
-   constraint pk_usuario_membresia primary key (cod_usuario, cod_membresia, created_at),
+   constraint pk_usuario_membresia primary key (cod_usuario, cod_membresia, order_id_paypal, created_at),
    constraint fk_usuario__reference_usuarios foreign key (cod_usuario)
       references efacture_repo.usuarios (cod_usuario)
       on delete cascade on update cascade,
@@ -199,4 +202,3 @@ INSERT INTO efacture_repo.usuarios(
 	identificacion, nombres, apellidos, correo, password, tipo_usuario)
 	VALUES ('0602908170', 'darwin', 'bayas', 'tidomarh@hotmail.com', '$pbkdf2-sha256$29000$jXHOuTcG4HxPSan1XiuFEA$JVaoEKE.SpN1PEFJKpyO.YvZGabhPp8P0AXX2mjZ/Zc', 'admin');
 
-insert into efacture_repo.sueldo_basico(valor_sueldo) values(460);
