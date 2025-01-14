@@ -77,6 +77,7 @@ create table efacture_repo.comprobantes (
    archivo              text                 not null,
    clave_acceso         text                 not null UNIQUE,
    razon_social         varchar(100)         not null,
+   ruc                  varchar(13)          not null,
    fecha_emision        date                 not null,
    importe_total        NUMERIC(10,2)        not null,
    created_at           timestamp            not null default current_timestamp,
