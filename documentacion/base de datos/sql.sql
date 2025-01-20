@@ -1,18 +1,49 @@
 /*==============================================================*/
-/* Table: categorias_comprobante                                */
+/* Table: periodo_fiscal                                        */
 /*==============================================================*/
-create table efacture_repo.categorias (
-   cod_categoria        serial not NULL,
-   categoria            varchar(50)          not null UNIQUE,
-   descripcion_categoria text                 null,
-   cant_sueldos_basico  int2                 not null
-      constraint ckc_cant_sueldos_basi_categori check (cant_sueldos_basico >= 1),
-   estado               varchar(20)          not null default 'disponible'
-      constraint ckc_estado_categori check (estado in ('disponible','no disponible')),
+create table efacture_repo.periodo_fiscal (
+   cod_periodo_fiscal   serial               not null,
+   periodo_fiscal       numeric(4)           not null
+      constraint ckc_periodo_fiscal_periodo_ check (periodo_fiscal >= 2021) UNIQUE,
    created_at           timestamp            not null default current_timestamp,
    updated_at           timestamp            null,
    deleted_at           timestamp            null,
-   constraint pk_categorias primary key (cod_categoria)
+   constraint pk_periodo_fiscal primary key (cod_periodo_fiscal)
+);
+
+/*==============================================================*/
+/* Table: fraccion_basica_desgravada                            */
+/*==============================================================*/
+create table efacture_repo.fraccion_basica_desgravada (
+   cod_fraccion_basica  serial               not null,
+   cod_periodo_fiscal   int4                 not null UNIQUE,
+   valor_fraccion_basica numeric(10,2)        not null
+      constraint ckc_valor_fraccion_ba_fraccion check (valor_fraccion_basica >= 0),
+   created_at           timestamp            not null default current_timestamp,
+   updated_at           timestamp            null,
+   deleted_at           timestamp            null,
+   constraint pk_fraccion_basica_desgravada primary key (cod_fraccion_basica),
+   constraint fk_fraccion_reference_periodo_ foreign key (cod_periodo_fiscal)
+      references efacture_repo.periodo_fiscal (cod_periodo_fiscal)
+      on delete cascade on update cascade
+);
+
+/*==============================================================*/
+/* Table: categorias_comprobante                                */
+/*==============================================================*/
+create table efacture_repo.categorias (
+   cod_categoria        serial               not null,
+   cod_fraccion_basica  int4                 not null,
+   categoria            varchar(50)          not null UNIQUE,
+   descripcion_categoria text                 null,
+   cant_fraccion_basica numeric(6,3)         not null
+      constraint ckc_cant_fraccion_bas_categori check (cant_fraccion_basica >= 0),
+   created_at           timestamp            not null default current_timestamp,
+   updated_at           timestamp            null,
+   deleted_at           timestamp            null,
+   constraint pk_categorias primary key (cod_categoria),
+   constraint fk_categori_reference_fraccion foreign key (cod_fraccion_basica)
+      references efacture_repo.fraccion_basica_desgravada (cod_fraccion_basica)
 );
 
 /*==============================================================*/
@@ -37,24 +68,6 @@ comment on column efacture_repo.usuarios.created_at is
 'fecha de registro';
 
 /*==============================================================*/
-/* Table: deducciones                                           */
-/*==============================================================*/
-create table efacture_repo.deducciones (
-   cod_deduccion        serial               not null,
-   cod_usuario          int4                 null,
-   prediodo_fiscal      varchar(50)          not null,
-   valor_deducido       NUMERIC              not null,
-   archivo_deduccion    text                 not null,
-   created_at           timestamp            not null default current_timestamp,
-   deleted_at           timestamp            null,
-   updated_at           timestamp            null,
-   constraint pk_deducciones primary key (cod_deduccion),
-   constraint fk_deduccio_reference_usuarios foreign key (cod_usuario)
-      references efacture_repo.usuarios (cod_usuario)
-      on delete cascade on update cascade
-);
-
-/*==============================================================*/
 /* Table: comprador                                             */
 /*==============================================================*/
 create table efacture_repo.comprador (
@@ -73,7 +86,6 @@ create table efacture_repo.comprador (
 create table efacture_repo.comprobantes (
    cod_comprobante      serial               not null,
    cod_comprador        int4                 not null,
-   cod_deduccion        int4                 null,
    archivo              text                 not null,
    clave_acceso         text                 not null UNIQUE,
    razon_social         varchar(100)         not null,
@@ -86,25 +98,7 @@ create table efacture_repo.comprobantes (
    constraint pk_comprobantes primary key (cod_comprobante),
    constraint fk_comproba_reference_comprado foreign key (cod_comprador)
       references efacture_repo.comprador (cod_comprador)
-      on delete cascade on update cascade,
-   constraint fk_comproba_reference_deduccio foreign key (cod_deduccion)
-      references efacture_repo.deducciones (cod_deduccion)
       on delete cascade on update cascade
-);
-
-
-/*==============================================================*/
-/* Table: sueldo_basico                                   */
-/*==============================================================*/
-create table efacture_repo.sueldo_basico (
-   cod_sueldo           serial           not null,
-   valor_sueldo         NUMERIC(7,2)         not null default 460
-      constraint ckc_valor_sueldo_sueldo_b check (valor_sueldo >= 1),
-   periodo_fiscal       date                 not null,
-   created_at           timestamp            not null default current_timestamp,
-   updated_at           timestamp            null,
-   deleted_at           timestamp            null,
-   constraint pk_sueldo_basico primary key (cod_sueldo)
 );
 
 /*==============================================================*/
@@ -182,6 +176,21 @@ create table efacture_repo.usuario_membresia (
 comment on column efacture_repo.usuario_membresia.created_at is
 'fecha de compra';
 
+/*==============================================================*/
+/* Table: configuracion                                         */
+/*==============================================================*/
+create table efacture_repo.configuracion (
+   cod_regla            serial               not null,
+   nombre               varchar(50)          not null UNIQUE,
+   descripcion          text                 not null,
+   campo                varchar(50)          not null,
+   operador             varchar(20)          not null,
+   valor                varchar(50)          not null,
+   created_at           timestamp            not null default current_timestamp,
+   updated_at           timestamp            null,
+   deleted_at           timestamp            null,
+   constraint pk_configuracion primary key (cod_regla)
+);
 
 --? usuario admin
 --valores por defecto
@@ -191,5 +200,5 @@ INSERT INTO efacture_repo.usuarios(
 	VALUES ('0602908170', 'darwin', 'bayas', 'tidomarh@hotmail.com', '$pbkdf2-sha256$29000$jXHOuTcG4HxPSan1XiuFEA$JVaoEKE.SpN1PEFJKpyO.YvZGabhPp8P0AXX2mjZ/Zc', 'admin');
 
 INSERT INTO efacture_repo.categorias(
-	cod_categoria, categoria, descripcion_categoria, cant_sueldos_basico)
-	VALUES (1, 'Desconocido', 'Categoria para detalles de comprobantes con categoria no deducible', 1);
+	cod_categoria, categoria, descripcion_categoria, fraccion_basica_desgravada)
+	VALUES (1, 'Desconocido', 'Categoria para detalles de comprobantes con categoria no deducible', 0);
