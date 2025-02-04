@@ -200,8 +200,7 @@ create table efacture_repo.configuracion (
 create table efacture_repo.usuarios_sesion (
    cod_usuario_sesion   serial               not null,
    cod_usuario          int4                 not null,
-   token_sesion         text                 null
-      constraint ckc_token_sesion_usuarios check (token_sesion is null or (token_sesion in ('cliente','admin'))),
+   token_sesion         text                 null,
    intentos_login       int2                 not null default 0,
    ip_cliente           varchar(50)          not null,
    created_at           timestamp            not null default current_timestamp,
